@@ -1,12 +1,12 @@
 import fileUtils from "./utils/file";
 import { DirectedAcyclicGraph } from "./graph/dag";
-
-import { assert } from "console";
+import { DirectedGraphNode } from "./graph/dagNode";
+import { GraphAnalysisService } from "./graph/dagAnalysisService";
 
 const MaxNodes = 100000;
 
 const main = async () => {
-  // Grab the file path from the command line arguments
+  // ----------- Extract the file path from the command line arguments
   const [filePath] = process.argv.slice(2);
 
   if (!filePath) {
@@ -34,10 +34,10 @@ const main = async () => {
     }
 
     // ----------- Create the DAG
-    const dag2 = new DirectedAcyclicGraph();
+    const dagGraph = new DirectedAcyclicGraph();
 
     // Origin node
-    dag2.addVertex(0, 0);
+    dagGraph.addVertex(0, 0);
 
     if (n > MaxNodes) {
       console.error(`The number of nodes must be less than ${MaxNodes}.`);
@@ -46,7 +46,7 @@ const main = async () => {
 
     for (let i = 0; i < n; i++) {
       const { leftParentId, rightParentId, timestamp } = inputs[i];
-      dag2.addVertex(i + 1, timestamp);
+      dagGraph.addVertex(i + 1, timestamp);
     }
 
     for (let i = 0; i < n; i++) {
@@ -57,22 +57,36 @@ const main = async () => {
         process.exit(1);
       }
 
-      dag2.addEdge(leftParentId - 1, i + 1);
+      dagGraph.addEdge(leftParentId - 1, i + 1);
 
-      dag2.addEdge(rightParentId - 1, i + 1);
+      dagGraph.addEdge(rightParentId - 1, i + 1);
     }
 
     console.log("====================================");
-    console.log("AVG DAG DEPTH: ", dag2.getAvgDepth(0).toFixed(3));
+    const graphAnalysisService = new GraphAnalysisService(dagGraph);
+
+    console.log(
+      "AVG DAG DEPTH: ",
+      graphAnalysisService.getAvgDepth(0).toFixed(3)
+    );
     console.log(
       "AVG TXS PER DEPTH: ",
-      dag2.getAvgTransactionPerDepth(0).toFixed(3)
+      graphAnalysisService.getAvgTransactionPerDepth(0).toFixed(3)
     );
-    console.log("AVG REF: ", dag2.getAvgInReferencePerNode(0).toFixed(3));
-    console.log("IS BIPARTITE: ", dag2.isBipartite(0));
-    console.log("TOPOLOGICAL SORT: ", dag2.topologicalSort());
-    console.log("ORDERED TIMESTAMP TXS: ", dag2.getOrderedTransactions());
-    console.log("CONNECTED COMPONENTS: ", dag2.getConnectedComponentsCount());
+    console.log(
+      "AVG REF: ",
+      graphAnalysisService.getAvgInReferencePerNode(0).toFixed(3)
+    );
+    console.log("IS BIPARTITE: ", graphAnalysisService.isBipartite(0));
+    console.log("TOPOLOGICAL SORT: ", graphAnalysisService.topologicalSort());
+    console.log(
+      "ORDERED TIMESTAMP TXS: ",
+      graphAnalysisService.getOrderedTransactions()
+    );
+    console.log(
+      "CONNECTED COMPONENTS: ",
+      graphAnalysisService.getConnectedComponentsCount()
+    );
   } catch (error) {
     console.error(`Error reading the file: ${error}`);
   }

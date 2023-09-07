@@ -118,31 +118,29 @@ export class GraphAnalysisService {
   }
 
   /**
-   * Get the average number of references per node.
-   * @param rootValue The root node value.
-   * @returns The average number of references per node.
+   * Get the average number of in-references per node.
+   * @returns The average number of in-references per node.
    */
-  getAvgInReferencePerNode(rootValue: number): number {
-    const refs = new Map<number, number>();
-    const rootNode = this.graph.vertices.get(rootValue);
+  getAvgInReferencePerNode(): number {
+    const inRefs = new Map<number, number>();
 
-    if (!rootNode) {
-      throw new Error("Root node not found");
+    for (const vertex of this.graph.vertices.keys()) {
+      inRefs.set(vertex, 0);
     }
 
-    const dfs = (node: DirectedGraphNode): void => {
-      refs.set(node.value, node.edges.size);
-      for (let child of node.edges) {
-        dfs(child);
+    for (const node of this.graph.vertices.values()) {
+      for (const child of node.edges) {
+        inRefs.set(child.value, (inRefs.get(child.value) || 0) + 1);
       }
-    };
+    }
 
-    dfs(rootNode);
-    const totalRefs = Array.from(refs.values()).reduce(
+    // Calculate the average
+    const totalInRefs = Array.from(inRefs.values()).reduce(
       (acc, ref) => acc + ref,
       0
     );
-    return totalRefs / this.graph.vertices.size;
+
+    return totalInRefs / this.graph.vertices.size;
   }
 
   /**
@@ -206,5 +204,21 @@ export class GraphAnalysisService {
       }
     }
     return components;
+  }
+
+  /**
+   * Get the number of leaf nodes in the graph.
+   * @returns The number of leaf nodes in the graph.
+   */
+  countLeafNodes(): number {
+    let count = 0;
+
+    for (let node of this.graph.vertices.values()) {
+      if (node.edges.length === 0) {
+        count++;
+      }
+    }
+
+    return count;
   }
 }

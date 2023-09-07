@@ -1,11 +1,11 @@
 export class DirectedGraphNode {
   value: number;
   timestamp: number | undefined;
-  edges: Set<DirectedGraphNode>;
+  edges: Array<DirectedGraphNode>;
 
   constructor(value: number) {
     this.value = value;
     this.timestamp = undefined;
-    this.edges = new Set();
+    this.edges = [];
   }
 }

@@ -35,7 +35,6 @@ export class DirectedAcyclicGraph {
     const targetNode = this.vertices.get(targetIndex);
 
     if (!parentNode || !targetNode) return false;
-    if (parentNode.edges.has(targetNode)) return false;
 
     // Check validity against parent timestamps
     if (
@@ -51,16 +50,27 @@ export class DirectedAcyclicGraph {
       );
     }
 
-    parentNode.edges.add(targetNode);
+    parentNode.edges.push(targetNode);
+
+    // console.debug(
+    //   "Adding edge: ",
+    //   parentNode.value,
+    //   targetIndex,
+    //   this.hasPath(targetNode, parentNode)
+    // );
 
     if (this.hasPath(targetNode, parentNode)) {
-      parentNode.edges.delete(targetNode);
+      const index = parentNode.edges.indexOf(targetNode);
+      if (index > -1) {
+        parentNode.edges.splice(index, 1);
+      }
+
+      // parentNode.edges.delete(targetNode);
       throw new Error(
         `Adding an edge from node [${parentNode.value}] to node [${targetIndex}] would create a cycle.`
       );
     }
-    // console.debug("Adding edge: ", parentNode.value, targetIndex);
-    return parentNode.edges.has(targetNode);
+    return parentNode.edges.indexOf(targetNode) > -1;
   }
 
   /**

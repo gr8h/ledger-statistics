@@ -3,8 +3,6 @@ import chaiAsPromised from "chai-as-promised";
 import { DirectedAcyclicGraph } from "../src/graph/dag";
 import { GraphAnalysisService } from "../src/graph/dagAnalysisService";
 import { DagBuilder } from "../src/graph/dagBuilder";
-import fileUtils from "../src/utils/file";
-import { promises as fs } from "fs";
 import path from "path";
 
 chai.use(chaiAsPromised);

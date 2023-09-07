@@ -24,7 +24,15 @@ describe("GraphAnalysisService", () => {
     service = new GraphAnalysisService(dag);
   }
 
+  // Graph setup Tests
   describe("Graph Setup", () => {
+    const originalWarn = console.warn;
+    afterEach(() => (console.warn = originalWarn));
+
+    let consoleOutput: string[] = [];
+    const mockedWarn = (output: string) => consoleOutput.push(output);
+    beforeEach(() => (console.warn = mockedWarn));
+
     it("should correctly set up the graph from a valid file", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
       chai.expect(dag.vertices.size).to.equal(6);
@@ -43,6 +51,17 @@ describe("GraphAnalysisService", () => {
         .expect(setupGraphFromFile("test/files/database_cycle.txt"))
         .to.eventually.be.rejectedWith(
           "Adding an edge from node [6] to node [7] would create a cycle."
+        );
+
+      chai
+        .expect(consoleOutput)
+        .to.include(
+          "Node [3] timestamp 1, is not greater than parent node [7] timestamp 5."
+        );
+      chai
+        .expect(consoleOutput)
+        .to.include(
+          "Node [4] timestamp 3, is not greater than parent node [5] timestamp 4."
         );
     });
 
@@ -64,8 +83,24 @@ describe("GraphAnalysisService", () => {
       if (childNode === undefined) return;
       chai.expect(parentNode?.edges.indexOf(childNode)).to.be.greaterThan(-1);
     });
+
+    it("should warn if a node has a timestamp earlier than its parent", async () => {
+      await setupGraphFromFile("test/files/database_timestamp.txt");
+
+      chai
+        .expect(consoleOutput)
+        .to.include(
+          "Node [4] timestamp 5, is not greater than parent node [2] timestamp 6."
+        );
+      chai
+        .expect(consoleOutput)
+        .to.include(
+          "Node [4] timestamp 5, is not greater than parent node [2] timestamp 6."
+        );
+    });
   });
 
+  // Graph Analysis Tests
   describe("Graph Analysis", () => {
     it("should return true for a bipartite graph", async () => {
       await setupGraphFromFile("test/files/database_bipartite.txt");

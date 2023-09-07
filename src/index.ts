@@ -1,68 +1,20 @@
-import fileUtils from "./utils/file";
-import { DirectedAcyclicGraph } from "./graph/dag";
-import { DirectedGraphNode } from "./graph/dagNode";
+import { DagBuilder } from "./graph/dagBuilder";
 import { GraphAnalysisService } from "./graph/dagAnalysisService";
 
-const MaxNodes = 100000;
-
 const main = async () => {
-  // ----------- Extract the file path from the command line arguments
-  const [filePath] = process.argv.slice(2);
-
-  if (!filePath) {
-    console.error("Please provide a file path.");
-    process.exit(1);
-  }
-
   try {
-    // ----------- Read the file
-    const content = await fileUtils.readFile(filePath);
+    const [filePath] = process.argv.slice(2);
 
-    // ----------- Parse the file content
-    const { n, inputs } = fileUtils.parseFile(content);
-
-    if (Number.isNaN(n)) {
-      console.error("Error parsing the file.");
+    if (!filePath) {
+      console.error("Please provide a file path.");
       process.exit(1);
     }
 
-    if (n !== inputs.length) {
-      console.error(
-        `The number of nodes ${n}, does not match the inputs ${inputs.length}.`
-      );
-      process.exit(1);
-    }
+    DagBuilder.MaxNodes = 100000;
+    const dagGraph = await DagBuilder.buildFromFile(filePath);
 
-    // ----------- Create the DAG
-    const dagGraph = new DirectedAcyclicGraph();
+    console.log("==STATS==================================", filePath);
 
-    // Origin node
-    dagGraph.addVertex(0, 0);
-
-    if (n > MaxNodes) {
-      console.error(`The number of nodes must be less than ${MaxNodes}.`);
-      process.exit(1);
-    }
-
-    for (let i = 0; i < n; i++) {
-      const { leftParentId, rightParentId, timestamp } = inputs[i];
-      dagGraph.addVertex(i + 1, timestamp);
-    }
-
-    for (let i = 0; i < n; i++) {
-      const { leftParentId, rightParentId, timestamp } = inputs[i];
-
-      if (leftParentId <= 0 || rightParentId <= 0) {
-        console.error("Left or Right Parent ID cannot be 0.");
-        process.exit(1);
-      }
-
-      dagGraph.addEdge(leftParentId - 1, i + 1);
-
-      dagGraph.addEdge(rightParentId - 1, i + 1);
-    }
-
-    console.log("====================================");
     const graphAnalysisService = new GraphAnalysisService(dagGraph);
 
     console.log(
@@ -75,7 +27,7 @@ const main = async () => {
     );
     console.log(
       "AVG REF: ",
-      graphAnalysisService.getAvgInReferencePerNode(0).toFixed(3)
+      graphAnalysisService.getAvgInReferencePerNode().toFixed(3)
     );
     console.log("IS BIPARTITE: ", graphAnalysisService.isBipartite(0));
     console.log("TOPOLOGICAL SORT: ", graphAnalysisService.topologicalSort());
@@ -87,8 +39,10 @@ const main = async () => {
       "CONNECTED COMPONENTS: ",
       graphAnalysisService.getConnectedComponentsCount()
     );
+    console.log("LEAF NODES: ", graphAnalysisService.countLeafNodes());
   } catch (error) {
     console.error(`Error reading the file: ${error}`);
+    process.exit(1);
   }
 };
 

@@ -1,5 +1,6 @@
 import { DagBuilder } from "./graph/dagBuilder";
 import { GraphAnalysisService } from "./graph/dagAnalysisService";
+import { round } from "./utils/math";
 
 const main = async () => {
   try {
@@ -17,12 +18,12 @@ const main = async () => {
 
     const dagService = new GraphAnalysisService(dag, 0);
 
-    console.log("AVG DAG DEPTH: ", dagService.getAvgDepth().toFixed(3));
+    console.log("AVG DAG DEPTH: ", round(dagService.getAvgDepth(), 2));
     console.log(
       "AVG TXS PER DEPTH: ",
-      dagService.getAvgTransactionPerDepth().toFixed(3)
+      round(dagService.getAvgTransactionPerDepth(), 2)
     );
-    console.log("AVG REF: ", dagService.getAvgInReferencePerNode().toFixed(3));
+    console.log("AVG REF: ", round(dagService.getAvgInReferencePerNode(), 3));
     console.log("IS BIPARTITE: ", dagService.isBipartite());
     console.log("TOPOLOGICAL SORT: ", dagService.topologicalSort());
     console.log("ORDERED TIMESTAMP TXS: ", dagService.getOrderedTransactions());
@@ -31,6 +32,7 @@ const main = async () => {
       dagService.getConnectedComponentsCount()
     );
     console.log("LEAF NODES: ", dagService.countLeafNodes());
+    console.log("AVG LATENCY: ", round(dagService.getAverageLatency(), 3));
   } catch (error) {
     console.error(`Error reading the file: ${error}`);
     process.exit(1);

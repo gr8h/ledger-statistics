@@ -150,9 +150,9 @@ export class GraphAnalysisService {
     const resultStack: number[] = [];
     const visit = (node: DirectedGraphNode) => {
       visited.add(node.id);
-      for (let neighbor of node.edges) {
-        if (!visited.has(neighbor.id)) {
-          visit(neighbor);
+      for (let child of node.edges) {
+        if (!visited.has(child.id)) {
+          visit(child);
         }
       }
       resultStack.push(node.id);
@@ -186,9 +186,9 @@ export class GraphAnalysisService {
 
     const dfs = (node: DirectedGraphNode) => {
       visited.add(node.id);
-      for (let neighbor of node.edges) {
-        if (!visited.has(neighbor.id)) {
-          dfs(neighbor);
+      for (let child of node.edges) {
+        if (!visited.has(child.id)) {
+          dfs(child);
         }
       }
     };
@@ -216,5 +216,23 @@ export class GraphAnalysisService {
     }
 
     return count;
+  }
+
+  getAverageLatency(): number {
+    let totalLatency = 0;
+    let count = 0;
+
+    for (let node of this.graph.vertices.values()) {
+      if (node.getTimestamp() !== undefined) {
+        for (let neighbor of node.edges) {
+          if (neighbor.getTimestamp() !== undefined) {
+            totalLatency += node.getTimestamp()! - neighbor.getTimestamp()!;
+            count++;
+          }
+        }
+      }
+    }
+
+    return count > 0 ? totalLatency / count : 0;
   }
 }

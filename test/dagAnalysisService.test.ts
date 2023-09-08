@@ -3,6 +3,8 @@ import chaiAsPromised from "chai-as-promised";
 import { DirectedAcyclicGraph } from "../src/graph/dag";
 import { GraphAnalysisService } from "../src/graph/dagAnalysisService";
 import { DagBuilder } from "../src/graph/dagBuilder";
+import { round } from "../src/utils/math";
+
 import path from "path";
 
 chai.use(chaiAsPromised);
@@ -112,19 +114,19 @@ describe("GraphAnalysisService", () => {
     it("should correctly calculate the average depth", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
       const avgDepth = service.getAvgDepth();
-      chai.expect(avgDepth.toFixed(2)).to.equal("1.33");
+      chai.expect(round(avgDepth, 2)).to.equal(1.33);
     });
 
     it("should correctly calculate the average transactions per depth", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
       const avgTxPerDepth = service.getAvgTransactionPerDepth();
-      chai.expect(avgTxPerDepth).to.equal(2.5);
+      chai.expect(round(avgTxPerDepth, 2)).to.equal(2.5);
     });
 
     it("should correctly calculate the average in-references per node", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
       const avgInRefPerNode = service.getAvgInReferencePerNode();
-      chai.expect(avgInRefPerNode.toFixed(3)).to.equal("1.667");
+      chai.expect(round(avgInRefPerNode, 3)).to.equal(1.667);
     });
 
     it("should provide a valid topological sort of the graph", async () => {

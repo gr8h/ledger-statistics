@@ -13,7 +13,7 @@ export class GraphAnalysisService {
 
   /**
    * Check if the graph is a bipartite graph.
-   * @param rootValue The root node value.
+   * @param rootValue The root node id.
    * @returns True if the graph is bipartite, false otherwise.
    */
   isBipartite(rootValue: number): boolean {
@@ -34,24 +34,24 @@ export class GraphAnalysisService {
     }
 
     // BFS to color all nodes
-    colors.set(rootNode.value, Color.White);
+    colors.set(rootNode.id, Color.White);
 
     const queue: DirectedGraphNode[] = [rootNode];
 
     while (queue.length) {
       const currentNode = queue.shift()!; // Remove first element
-      const currentColor = colors.get(currentNode.value);
+      const currentColor = colors.get(currentNode.id);
 
       if (currentColor !== undefined) {
         const nextColor = toggleColor(currentColor);
         for (let child of currentNode.edges) {
-          const childColor = colors.get(child.value);
+          const childColor = colors.get(child.id);
           if (childColor !== undefined) {
             if (childColor !== nextColor) {
               return false; // Adjacent nodes have the same color
             }
           } else {
-            colors.set(child.value, nextColor);
+            colors.set(child.id, nextColor);
             queue.push(child);
           }
         }
@@ -62,7 +62,7 @@ export class GraphAnalysisService {
 
   /**
    * Get the depth of each node in the graph.
-   * @param rootValue The root node value.
+   * @param rootValue The root node id.
    * @returns A map of node values to their depth.
    */
   getDepths(rootValue: number): Map<number, number> {
@@ -73,14 +73,14 @@ export class GraphAnalysisService {
       throw new Error("Root node not found");
     }
     // DFS to calculate depths
-    depths.set(rootNode.value, 0);
+    depths.set(rootNode.id, 0);
     const stack: [DirectedGraphNode, number][] = [[rootNode, 0]];
 
     while (stack.length) {
       const [currentNode, currentDepth] = stack.pop()!;
       for (let child of currentNode.edges) {
-        if (!depths.has(child.value)) {
-          depths.set(child.value, currentDepth + 1);
+        if (!depths.has(child.id)) {
+          depths.set(child.id, currentDepth + 1);
           stack.push([child, currentDepth + 1]);
         }
       }
@@ -91,7 +91,7 @@ export class GraphAnalysisService {
 
   /**
    * Get the average depth of the graph.
-   * @param rootValue The root node value.
+   * @param rootValue The root node id.
    * @returns The average depth of the graph.
    */
   getAvgDepth(rootValue: number): number {
@@ -105,7 +105,7 @@ export class GraphAnalysisService {
 
   /**
    * Get the average number of transactions per depth.
-   * @param rootValue The root node value.
+   * @param rootValue The root node id.
    * @returns The average number of transactions per depth.
    */
   getAvgTransactionPerDepth(rootValue: number): number {
@@ -130,7 +130,7 @@ export class GraphAnalysisService {
 
     for (const node of this.graph.vertices.values()) {
       for (const child of node.edges) {
-        inRefs.set(child.value, (inRefs.get(child.value) || 0) + 1);
+        inRefs.set(child.id, (inRefs.get(child.id) || 0) + 1);
       }
     }
 
@@ -153,17 +153,17 @@ export class GraphAnalysisService {
     const visited = new Set();
     const resultStack: number[] = [];
     const visit = (node: DirectedGraphNode) => {
-      visited.add(node.value);
+      visited.add(node.id);
       for (let neighbor of node.edges) {
-        if (!visited.has(neighbor.value)) {
+        if (!visited.has(neighbor.id)) {
           visit(neighbor);
         }
       }
-      resultStack.push(node.value);
+      resultStack.push(node.id);
     };
 
     for (let node of this.graph.vertices.values()) {
-      if (!visited.has(node.value)) {
+      if (!visited.has(node.id)) {
         visit(node);
       }
     }
@@ -176,8 +176,8 @@ export class GraphAnalysisService {
    */
   getOrderedTransactions(): number[] {
     return Array.from(this.graph.vertices.values())
-      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
-      .map((node) => node.value);
+      .sort((a, b) => (a.getTimestamp() || 0) - (b.getTimestamp() || 0))
+      .map((node) => node.id);
   }
 
   /**
@@ -189,16 +189,16 @@ export class GraphAnalysisService {
     let components = 0;
 
     const dfs = (node: DirectedGraphNode) => {
-      visited.add(node.value);
+      visited.add(node.id);
       for (let neighbor of node.edges) {
-        if (!visited.has(neighbor.value)) {
+        if (!visited.has(neighbor.id)) {
           dfs(neighbor);
         }
       }
     };
 
     for (let node of this.graph.vertices.values()) {
-      if (!visited.has(node.value)) {
+      if (!visited.has(node.id)) {
         dfs(node);
         components++;
       }

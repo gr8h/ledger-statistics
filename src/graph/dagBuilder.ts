@@ -1,4 +1,5 @@
 import { DirectedAcyclicGraph } from "./dag";
+import { InvalidInputError } from "./dagError";
 import fileUtils from "../utils/file";
 
 export class DagBuilder {
@@ -14,7 +15,7 @@ export class DagBuilder {
     const { n, inputs } = fileUtils.parseFile(content);
 
     if (Number.isNaN(n)) {
-      throw new Error("Error parsing the file.");
+      throw new InvalidInputError("Error parsing the file.");
     }
 
     if (n !== inputs.length) {
@@ -46,14 +47,15 @@ export class DagBuilder {
       const { leftParentId, rightParentId, timestamp } = inputs[i];
 
       const node = dagGraph.vertices.get(i + 1);
-      if (node && node.timestamp !== timestamp) {
-        node.timestamp = timestamp;
+      if (node && node.getTimestamp() !== timestamp) {
+        node.setTimestamp(timestamp);
       }
 
       if (leftParentId <= 0 || rightParentId <= 0) {
         throw new Error("Left or Right Parent ID cannot be 0.");
       }
 
+      //console.debug("Process: ", i + 1, leftParentId - 1, rightParentId - 1);
       dagGraph.addEdge(leftParentId - 1, i + 1);
 
       dagGraph.addEdge(rightParentId - 1, i + 1);

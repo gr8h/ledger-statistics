@@ -1,11 +1,19 @@
 export class DirectedGraphNode {
-  value: number;
-  timestamp: number | undefined;
+  id: number;
   edges: Array<DirectedGraphNode>;
+  private _timestamp: number | undefined;
 
-  constructor(value: number) {
-    this.value = value;
-    this.timestamp = undefined;
+  constructor(id: number) {
+    this.id = id;
+    this._timestamp = undefined;
     this.edges = [];
+  }
+
+  getTimestamp(): number | undefined {
+    return this._timestamp;
+  }
+
+  setTimestamp(value: number | undefined) {
+    this._timestamp = value;
   }
 }

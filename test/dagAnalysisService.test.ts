@@ -68,10 +68,10 @@ describe("GraphAnalysisService", () => {
     it("should add vertices with appropriate timestamps", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
       const node0 = dag.vertices.get(1);
-      chai.expect(node0?.timestamp).to.equal(0);
+      chai.expect(node0?.getTimestamp()).to.equal(0);
 
       const node5 = dag.vertices.get(5);
-      chai.expect(node5?.timestamp).to.equal(3);
+      chai.expect(node5?.getTimestamp()).to.equal(3);
     });
 
     it("should correctly add edges between nodes", async () => {

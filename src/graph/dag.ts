@@ -1,4 +1,5 @@
 import { DirectedGraphNode } from "./dagNode";
+import { CycleError } from "./dagError";
 
 /**
  * A directed acyclic graph.
@@ -18,7 +19,7 @@ export class DirectedAcyclicGraph {
    */
   addVertex(index: number, timestamp: number): DirectedGraphNode {
     const newNode = new DirectedGraphNode(index);
-    newNode.timestamp = timestamp;
+    newNode.setTimestamp(timestamp);
     this.vertices.set(index, newNode);
 
     return newNode;
@@ -37,16 +38,19 @@ export class DirectedAcyclicGraph {
     if (!parentNode || !targetNode) return false;
 
     // Check validity against parent timestamps
-    if (
-      targetNode.timestamp == undefined ||
-      parentNode.timestamp == undefined
-    ) {
+    const targetNodeTs = targetNode.getTimestamp();
+    const parentNodeTs = parentNode.getTimestamp();
+    if (targetNodeTs == undefined || parentNodeTs == undefined) {
       throw new Error("Timestamp is undefined.");
     }
 
-    if (targetNode.timestamp < parentNode.timestamp) {
+    if (targetNodeTs < parentNodeTs) {
       console.warn(
-        `Node [${targetNode.value}] timestamp ${targetNode.timestamp}, is not greater than parent node [${parentNode.value}] timestamp ${parentNode.timestamp}.`
+        `Node [${
+          targetNode.id
+        }] timestamp ${targetNode.getTimestamp()}, is not greater than parent node [${
+          parentNode.id
+        }] timestamp ${parentNode.getTimestamp()}.`
       );
     }
 
@@ -54,7 +58,7 @@ export class DirectedAcyclicGraph {
 
     // console.debug(
     //   "Adding edge: ",
-    //   parentNode.value,
+    //   parentNode.id,
     //   targetIndex,
     //   this.hasPath(targetNode, parentNode)
     // );
@@ -64,11 +68,7 @@ export class DirectedAcyclicGraph {
       if (index > -1) {
         parentNode.edges.splice(index, 1);
       }
-
-      // parentNode.edges.delete(targetNode);
-      throw new Error(
-        `Adding an edge from node [${parentNode.value}] to node [${targetIndex}] would create a cycle.`
-      );
+      throw new CycleError(parentNode.id, targetNode.id);
     }
     return parentNode.edges.indexOf(targetNode) > -1;
   }

@@ -11,17 +11,12 @@ describe("GraphAnalysisService", () => {
   let dag: DirectedAcyclicGraph;
   let service: GraphAnalysisService;
 
-  beforeEach(() => {
-    dag = new DirectedAcyclicGraph();
-    service = new GraphAnalysisService(dag);
-  });
-
   async function setupGraphFromFile(relativePath: string) {
     const filePath = path.join(process.cwd(), relativePath);
 
     DagBuilder.MaxNodes = 100000;
     dag = await DagBuilder.buildFromFile(filePath);
-    service = new GraphAnalysisService(dag);
+    service = new GraphAnalysisService(dag, 0);
   }
 
   // Graph setup Tests
@@ -104,25 +99,25 @@ describe("GraphAnalysisService", () => {
   describe("Graph Analysis", () => {
     it("should return true for a bipartite graph", async () => {
       await setupGraphFromFile("test/files/database_bipartite.txt");
-      const result = service.isBipartite(0);
+      const result = service.isBipartite();
       chai.expect(result).to.be.true;
     });
 
     it("should return false for a non-bipartite graph", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
-      const result = service.isBipartite(0);
+      const result = service.isBipartite();
       chai.expect(result).to.be.false;
     });
 
     it("should correctly calculate the average depth", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
-      const avgDepth = service.getAvgDepth(0);
+      const avgDepth = service.getAvgDepth();
       chai.expect(avgDepth.toFixed(2)).to.equal("1.33");
     });
 
     it("should correctly calculate the average transactions per depth", async () => {
       await setupGraphFromFile("test/files/database_original.txt");
-      const avgTxPerDepth = service.getAvgTransactionPerDepth(0);
+      const avgTxPerDepth = service.getAvgTransactionPerDepth();
       chai.expect(avgTxPerDepth).to.equal(2.5);
     });
 

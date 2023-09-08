@@ -1,22 +1,30 @@
 import { DirectedAcyclicGraph } from "./dag";
 import { DirectedGraphNode } from "./dagNode";
+import { NodeNotFoundError } from "./dagError";
 
 /**
  * A directed acyclic graph analysis.
  */
 export class GraphAnalysisService {
   private graph: DirectedAcyclicGraph;
+  private rootNode: DirectedGraphNode;
 
-  constructor(graph: DirectedAcyclicGraph) {
+  constructor(graph: DirectedAcyclicGraph, rootId: number) {
     this.graph = graph;
+
+    const rootNode = this.graph.vertices.get(rootId);
+    if (rootNode === undefined) {
+      throw new NodeNotFoundError(rootId);
+    } else {
+      this.rootNode = rootNode;
+    }
   }
 
   /**
    * Check if the graph is a bipartite graph.
-   * @param rootValue The root node id.
    * @returns True if the graph is bipartite, false otherwise.
    */
-  isBipartite(rootValue: number): boolean {
+  isBipartite(): boolean {
     enum Color {
       Black,
       White,
@@ -28,15 +36,10 @@ export class GraphAnalysisService {
 
     const colors = new Map<number, Color>();
 
-    const rootNode = this.graph.vertices.get(rootValue);
-    if (!rootNode) {
-      throw new Error("Root node not found");
-    }
-
     // BFS to color all nodes
-    colors.set(rootNode.id, Color.White);
+    colors.set(this.rootNode.id, Color.White);
 
-    const queue: DirectedGraphNode[] = [rootNode];
+    const queue: DirectedGraphNode[] = [this.rootNode];
 
     while (queue.length) {
       const currentNode = queue.shift()!; // Remove first element
@@ -48,7 +51,7 @@ export class GraphAnalysisService {
           const childColor = colors.get(child.id);
           if (childColor !== undefined) {
             if (childColor !== nextColor) {
-              return false; // Adjacent nodes have the same color
+              return false;
             }
           } else {
             colors.set(child.id, nextColor);
@@ -62,19 +65,14 @@ export class GraphAnalysisService {
 
   /**
    * Get the depth of each node in the graph.
-   * @param rootValue The root node id.
    * @returns A map of node values to their depth.
    */
-  getDepths(rootValue: number): Map<number, number> {
+  getDepths(): Map<number, number> {
     const depths = new Map<number, number>();
-    const rootNode = this.graph.vertices.get(rootValue);
 
-    if (!rootNode) {
-      throw new Error("Root node not found");
-    }
     // DFS to calculate depths
-    depths.set(rootNode.id, 0);
-    const stack: [DirectedGraphNode, number][] = [[rootNode, 0]];
+    depths.set(this.rootNode.id, 0);
+    const stack: [DirectedGraphNode, number][] = [[this.rootNode, 0]];
 
     while (stack.length) {
       const [currentNode, currentDepth] = stack.pop()!;
@@ -91,11 +89,10 @@ export class GraphAnalysisService {
 
   /**
    * Get the average depth of the graph.
-   * @param rootValue The root node id.
    * @returns The average depth of the graph.
    */
-  getAvgDepth(rootValue: number): number {
-    const depths = this.getDepths(rootValue);
+  getAvgDepth(): number {
+    const depths = this.getDepths();
     const totalDepth = Array.from(depths.values()).reduce(
       (acc, depth) => acc + depth,
       0
@@ -105,14 +102,13 @@ export class GraphAnalysisService {
 
   /**
    * Get the average number of transactions per depth.
-   * @param rootValue The root node id.
    * @returns The average number of transactions per depth.
    */
-  getAvgTransactionPerDepth(rootValue: number): number {
+  getAvgTransactionPerDepth(): number {
     if (this.graph.vertices.size === 1) {
       return 0;
     }
-    const depths = this.getDepths(rootValue);
+    const depths = this.getDepths();
     const maxDepth = Math.max(...Array.from(depths.values()));
     return (this.graph.vertices.size - 1) / maxDepth;
   }

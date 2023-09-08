@@ -15,7 +15,7 @@ export class InvalidInputError extends DAGError {
 
 export class NodeNotFoundError extends DAGError {
   constructor(node: number) {
-    super(`Node with value ${node} not found in the DAG.`);
+    super(`Node with id [${node}] not found in the DAG.`);
     this.name = NodeNotFoundError.name;
   }
 }
@@ -26,5 +26,12 @@ export class CycleError extends DAGError {
       `Adding an edge from node [${source}] to node [${destination}] would create a cycle.`
     );
     this.name = CycleError.name;
+  }
+}
+
+export class InvalidTimestamp extends DAGError {
+  constructor(message: string = "Timestamp is undefined.") {
+    super(message);
+    this.name = InvalidInputError.name;
   }
 }

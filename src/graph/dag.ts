@@ -1,5 +1,5 @@
 import { DirectedGraphNode } from "./dagNode";
-import { CycleError } from "./dagError";
+import { CycleError, InvalidTimestamp } from "./dagError";
 
 /**
  * A directed acyclic graph.
@@ -41,7 +41,7 @@ export class DirectedAcyclicGraph {
     const targetNodeTs = targetNode.getTimestamp();
     const parentNodeTs = parentNode.getTimestamp();
     if (targetNodeTs == undefined || parentNodeTs == undefined) {
-      throw new Error("Timestamp is undefined.");
+      throw new InvalidTimestamp();
     }
 
     if (targetNodeTs < parentNodeTs) {

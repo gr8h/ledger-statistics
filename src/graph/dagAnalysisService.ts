@@ -105,9 +105,6 @@ export class GraphAnalysisService {
    * @returns The average number of transactions per depth.
    */
   getAvgTransactionPerDepth(): number {
-    if (this.graph.vertices.size === 1) {
-      return 0;
-    }
     const depths = this.getDepths();
     const maxDepth = Math.max(...Array.from(depths.values()));
     return (this.graph.vertices.size - 1) / maxDepth;

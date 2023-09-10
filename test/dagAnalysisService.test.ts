@@ -21,7 +21,17 @@ describe("DAG Analysis Service", () => {
     service = new GraphAnalysisService(dag, 0);
   }
 
-  // Graph Analysis Tests
+  describe("DAG Analysis Service Constructor", () => {
+    it("should throw an error if the root node is not found", async () => {
+      await setupGraphFromFile("test/files/database_original.txt");
+      chai
+        .expect(() => {
+          new GraphAnalysisService(dag, 100);
+        })
+        .to.throw("Node with id [100] not found in the DAG.");
+    });
+  });
+
   describe("DAG Analysis Functions", () => {
     it("should return true for a bipartite graph", async () => {
       await setupGraphFromFile("test/files/database_bipartite.txt");
@@ -69,6 +79,12 @@ describe("DAG Analysis Service", () => {
       await setupGraphFromFile("test/files/database_original.txt");
       const leafCount = service.countLeafNodes();
       chai.expect(leafCount).to.equal(2);
+    });
+
+    it("should correctly count the number of connected components in the graph", async () => {
+      await setupGraphFromFile("test/files/database_original.txt");
+      const leafCount = service.getConnectedComponentsCount();
+      chai.expect(leafCount).to.equal(1);
     });
   });
 });

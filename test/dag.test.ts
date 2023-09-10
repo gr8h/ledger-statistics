@@ -42,6 +42,12 @@ describe("DAG", () => {
         );
     });
 
+    it("should throw an error for invalid timestamp", async () => {
+      await chai
+        .expect(setupGraphFromFile("test/files/database_timestamp_ud.txt"))
+        .to.eventually.be.rejectedWith("Timestamp is undefined.");
+    });
+
     it("should throw an error for a graph with a cycle", async () => {
       await chai
         .expect(setupGraphFromFile("test/files/database_cycle.txt"))

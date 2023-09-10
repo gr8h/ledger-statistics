@@ -13,8 +13,9 @@ Given a list of transactions with their unique identifiers, two reference transa
 
 ## Assumptions
 
-- **Bipartite Graph**: The constructed graph is assumed to be bipartite. However, most of our calculations work even if it's not. The reason for wanting it bipartite could be tied to some real-world situations.
-- **Timestamp**: Each node in the graph has an associated timestamp. For now, it's used for operations like ordering the transactions, validating if a transaction has a timestamp earlier than its parent.
+- **Bipartite Graph**: The constructed graph is assumed to be bipartite. However, most of our calculations work even if it's not.
+- **Timestamp**: Each node in the graph has an associated timestamp. For now, it's used for operations like ordering the transactions, validating ... etc.
+- **Unique IDs**: Each node in the graph has a unique identifier. This is used to identify nodes in the graph and to reference them in the input data, the IDs are assumed to be integers and start from 0.
 
 ## Getting Started
 
@@ -28,6 +29,7 @@ Given a list of transactions with their unique identifiers, two reference transa
 1. Place your transaction data in a `.txt` file with the structure specified below.
    Examples are provided in the `test/files` directory.
 2. Run the main program with the path to your data file as an argument.
+   For example:
    ```
    yarn start test/files/database_original.txt
    ```
@@ -46,16 +48,7 @@ Where:
 - `L` and `R` are the left and right parent node IDs, respectively.
 - `T` is the timestamp.
 
-Example:
-
-```
-5
-1 1 0
-1 2 0
-2 2 1
-3 3 2
-3 4 3
-```
+Examples are provided in the `test/files` directory.
 
 ### Tests
 
@@ -63,4 +56,10 @@ Run tests using the following command:
 
 ```
 yarn test
+```
+
+Get test coverage using the following command:
+
+```
+yarn test:coverage
 ```
